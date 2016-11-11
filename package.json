@@ -1,0 +1,12 @@
+{
+  "name": "hyperlayout",
+  "version": "0.0.1",
+  "description": "Layout loader for Hyper.app",
+  "main": "index.js",
+  "repository": {
+    "url": "timolins/hyperlayout",
+    "type": "git"
+  },
+  "author": "Timo Lins <me@timo.sh>",
+  "license": "MIT"
+}
