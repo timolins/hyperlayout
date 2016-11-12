@@ -6,6 +6,9 @@
   "repository": "timolins/hyperlayout",
   "author": "Timo Lins <me@timo.sh>",
   "license": "MIT",
+  "keywords": [
+    "hyper"
+  ],
   "scripts": {
     "test": "xo"
   },
