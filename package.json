@@ -14,7 +14,8 @@
     "space": true,
     "semicolon": false,
     "env": [
-      "node"
+      "node",
+      "browser"
     ]
   },
   "devDependencies": {
