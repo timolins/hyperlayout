@@ -15,7 +15,7 @@ exports.middleware = store => next => action => {
     const {data} = action
     if (/(hyperlayout: command not found)|(command not found: hyperlayout)/.test(data)) {
       const {ui} = store.getState()
-      requestSplit(DIRECTION.VERICAL, ui.cwd)
+      requestSplit(DIRECTION.VERTICAL, ui.cwd)
     }
   }
   next(action)
