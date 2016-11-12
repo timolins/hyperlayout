@@ -5,5 +5,19 @@
   "main": "index.js",
   "repository": "timolins/hyperlayout",
   "author": "Timo Lins <me@timo.sh>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "xo"
+  },
+  "xo": {
+    "esnext": true,
+    "space": true,
+    "semicolon": false,
+    "env": [
+      "node"
+    ]
+  },
+  "devDependencies": {
+    "xo": "^0.17.0"
+  }
 }
