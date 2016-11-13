@@ -137,6 +137,12 @@ const workQueue = (store, currentUid) => {
   }
 }
 
+const getPIDByUID = (store, uid) => {
+  const {sessions} = store.getState()
+  const session = sessions.sessions[uid]
+  return session.pid
+}
+
 let firstUid
 exports.middleware = store => next => action => {
   const {uid, type} = action
@@ -145,8 +151,31 @@ exports.middleware = store => next => action => {
     workQueue(store, uid)
   }
   if (isCommand(action)) {
-    queue = generateQueue(convertConfig(example))
-    workQueue(store, uid || firstUid)
+    const session = getPIDByUID(store, uid || firstUid)
+    getCwd(session).then(cwd => {
+      cwd = cwd.stdout.trim()
+      const config = getConfig(cwd)
+      queue = generateQueue(convertConfig(config))
+      workQueue(store, uid || firstUid)
+    })
+    .catch(err => {
+      console.error(`Couldn't get cwd`, err)
+    })
   }
   next(action)
+}
+
+function getConfig(cwd) {
+  try {
+    const config = require(`${cwd}/package.json`)
+    return config.hyperlayout
+  } catch (err) {
+    console.error('No package.json found in directory')
+  }
+  try {
+    return require(`${cwd}/.hyperlayout`)
+  } catch (err) {
+    console.error('No .hyperlayout found in directory')
+    return example
+  }
 }
