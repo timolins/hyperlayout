@@ -59,7 +59,7 @@ const resolveArray = array => (
   array instanceof Array ? resolveArray(array[0]) : array
 )
 
-const nextMod = mode => {
+const nextMod = mode => {
   switch (mode) {
     case 'TAB':
     case 'VERTICAL':
@@ -118,7 +118,7 @@ const workQueue = (store, currentUid) => {
     }
     lastIndex = index
     if (item.action === 'split') {
-      if (item.mode == 'TAB') {
+      if (item.mode === 'TAB') {
         requestSession(currentSession.pid)
       } else {
         requestSession(currentSession.pid, item.mode)
