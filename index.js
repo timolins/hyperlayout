@@ -2,12 +2,13 @@ const DIRECTION = {
   HORIZONTAL: 'HORIZONTAL',
   VERTICAL: 'VERTICAL'
 }
+
 const example = [
-  'test',
-  ['test', ['test', 'test']],
-  ['test', 'test']
+  ['1', '3'],
+  '2'
 ]
 
+console.log(process.env.HOME)
 function requestSplit(splitDirection, cwd) {
   window.rpc.emit('new', {
     splitDirection,
@@ -75,19 +76,19 @@ let lastIndex = 0
 
 const workQueue = (store, currentUid) => {
   if (queue.length > 0) {
-    // queue.map(console.log)
     const item = queue.shift()
-    console.log(item)
     const {index} = item.pane
-    if (lastIndex) {
+    console.log(item, lastIndex)
+    if (!panes[lastIndex].uid) {
       panes[lastIndex].uid = currentUid
     }
     lastIndex = index
     if (item.action === 'split') {
       requestSplit(item.direction)
     } else {
-      if (panes[index].uid) {
-        focusUid(store, panes[index].uid)
+      const jumpTo = panes[index].uid
+      if (jumpTo) {
+        focusUid(store, jumpTo)
       }
       workQueue(store, currentUid)
     }
