@@ -1,18 +1,37 @@
+const {exec} = require('child-process-promise');
 const DIRECTION = {
   HORIZONTAL: 'HORIZONTAL',
   VERTICAL: 'VERTICAL'
 }
+//
+// const example = [
+//   'echo 1',
+//   ['echo 2', ['echo 4', 'echo 5']],
+//   ['echo 3', 'echo 6']
+// ]
 
 const example = [
-  ['1', '3'],
-  '2'
+  ['yarn dev', 'dotenv nodemon build/index.js']
 ]
 
-console.log(process.env.HOME)
-function requestSplit(splitDirection, cwd) {
-  window.rpc.emit('new', {
-    splitDirection,
-    cwd
+function requestSplit(splitDirection, cwdPid) {
+  exec(`lsof -p ${cwdPid} | grep cwd | tr -s ' ' | cut -d ' ' -f9-`)
+  .then(cwd => {
+    cwd = cwd.stdout.trim()
+    window.rpc.emit('new', {
+      splitDirection,
+      cwd
+    })
+  })
+  .catch(err => {
+    console.error(`Couldn't get cwd`, err)
+  })
+}
+
+function runCommand(uid, cmd) {
+  window.rpc.emit('data', {
+    uid,
+    data: ` ${cmd}\n`
   })
 }
 
@@ -29,7 +48,7 @@ const convertConfig = item => {
   if (item instanceof Array) {
     return item.map(convertConfig)
   } else if (typeof item === 'string') {
-    const pane = {pid: '', cmd: item, index: panes.length}
+    const pane = {cmd: item, index: panes.length}
     panes.push(pane)
     return pane
   }
@@ -78,13 +97,14 @@ const workQueue = (store, currentUid) => {
   if (queue.length > 0) {
     const item = queue.shift()
     const {index} = item.pane
-    console.log(item, lastIndex)
     if (!panes[lastIndex].uid) {
       panes[lastIndex].uid = currentUid
+      runCommand(currentUid, panes[lastIndex].cmd)
     }
     lastIndex = index
     if (item.action === 'split') {
-      requestSplit(item.direction)
+      const {sessions} = store.getState()
+      requestSplit(item.direction, sessions.sessions[currentUid].pid)
     } else {
       const jumpTo = panes[index].uid
       if (jumpTo) {
@@ -92,6 +112,9 @@ const workQueue = (store, currentUid) => {
       }
       workQueue(store, currentUid)
     }
+  } else if (lastIndex) {
+    runCommand(currentUid, panes[lastIndex].cmd)
+    lastIndex = 0
   }
 }
 
