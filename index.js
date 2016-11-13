@@ -1,26 +1,31 @@
 const {exec} = require('child-process-promise')
 
-//
-// const example = [
-//   'echo 1',
-//   ['echo 2', ['echo 4', 'echo 5']],
-//   ['echo 3', 'echo 6']
-// ]
-
 const example = [
-  ['echo 1'], ['echo 1', 'echo 2']
+  'echo 1',
+  ['echo 2', ['echo 4', 'echo 5']],
+  ['echo 3', 'echo 6']
 ]
+
+// const example = [
+//   ['echo 1'], ['echo 1', 'echo 2']
+// ]
 
 const getCwd = pid => exec(`lsof -p ${pid} | grep cwd | tr -s ' ' | cut -d ' ' -f9-`)
 
-function requestSession(cwdPid, splitDirection) {
+function requestSession(cwdPid, mode) {
   getCwd(cwdPid)
   .then(cwd => {
     cwd = cwd.stdout.trim()
-    window.rpc.emit('new', {
-      splitDirection,
-      cwd
-    })
+    const payload = {cwd}
+    switch (mode) {
+      case 'HORIZONTAL':
+      case 'VERTICAL':
+        payload.splitDirection = mode
+        break
+      default:
+        break
+    }
+    window.rpc.emit('new', payload)
   })
   .catch(err => {
     console.error(`Couldn't get cwd`, err)
@@ -118,11 +123,7 @@ const workQueue = (store, currentUid) => {
     }
     lastIndex = index
     if (item.action === 'split') {
-      if (item.mode == 'TAB') {
-        requestSession(currentSession.pid)
-      } else {
-        requestSession(currentSession.pid, item.mode)
-      }
+      requestSession(currentSession.pid, item.mode)
     } else {
       const jumpTo = panes[index].uid
       if (jumpTo) {
