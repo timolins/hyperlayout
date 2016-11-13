@@ -1,8 +1,5 @@
-const {exec} = require('child-process-promise');
-const DIRECTION = {
-  HORIZONTAL: 'HORIZONTAL',
-  VERTICAL: 'VERTICAL'
-}
+const {exec} = require('child-process-promise')
+
 //
 // const example = [
 //   'echo 1',
@@ -11,11 +8,13 @@ const DIRECTION = {
 // ]
 
 const example = [
-  ['yarn dev', 'dotenv nodemon build/index.js']
+  ['echo 1'], ['echo 1', 'echo 2']
 ]
 
-function requestSplit(splitDirection, cwdPid) {
-  exec(`lsof -p ${cwdPid} | grep cwd | tr -s ' ' | cut -d ' ' -f9-`)
+const getCwd = pid => exec(`lsof -p ${pid} | grep cwd | tr -s ' ' | cut -d ' ' -f9-`)
+
+function requestSession(cwdPid, splitDirection) {
+  getCwd(cwdPid)
   .then(cwd => {
     cwd = cwd.stdout.trim()
     window.rpc.emit('new', {
@@ -60,14 +59,28 @@ const resolveArray = array => (
   array instanceof Array ? resolveArray(array[0]) : array
 )
 
-function generateQueue(converted, horizontal = true) {
+const nextMod = mode => {
+  switch (mode) {
+    case 'TAB':
+    case 'VERTICAL':
+      return 'HORIZONTAL'
+    case 'HORIZONTAL':
+      return 'VERTICAL'
+    case 'WINDOW':
+      return 'TAB'
+    default:
+      return 'WINDOW'
+  }
+}
+
+function generateQueue(converted, mode = 'TAB') {
   let q = []
   if (converted instanceof Array) {
     converted.forEach((item, i) => {
       if (i > 0) {
         q.push({
           action: 'split',
-          direction: horizontal ? DIRECTION.HORIZONTAL : DIRECTION.VERTICAL,
+          mode,
           pane: resolveArray(item)
         })
       } else {
@@ -78,7 +91,7 @@ function generateQueue(converted, horizontal = true) {
       }
     })
     converted.forEach(item => {
-      q = [...q, ...generateQueue(item, !horizontal)]
+      q = [...q, ...generateQueue(item, nextMod(mode))]
     })
   }
   return q
@@ -94,6 +107,8 @@ let queue = []
 let lastIndex = 0
 
 const workQueue = (store, currentUid) => {
+  const {sessions} = store.getState()
+  const currentSession = sessions.sessions[currentUid]
   if (queue.length > 0) {
     const item = queue.shift()
     const {index} = item.pane
@@ -103,8 +118,11 @@ const workQueue = (store, currentUid) => {
     }
     lastIndex = index
     if (item.action === 'split') {
-      const {sessions} = store.getState()
-      requestSplit(item.direction, sessions.sessions[currentUid].pid)
+      if (item.mode == 'TAB') {
+        requestSession(currentSession.pid)
+      } else {
+        requestSession(currentSession.pid, item.mode)
+      }
     } else {
       const jumpTo = panes[index].uid
       if (jumpTo) {
