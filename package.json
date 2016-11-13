@@ -2,10 +2,12 @@
   "name": "hyperlayout",
   "version": "0.0.1",
   "description": "Layout presets for Hyper.app",
-  "main": "index.js",
   "repository": "timolins/hyperlayout",
   "author": "Timo Lins <me@timo.sh>",
   "license": "MIT",
+  "bin": {
+    "hyperlayout": "bin/hyperlayout"
+  },
   "keywords": [
     "hyper"
   ],
@@ -25,6 +27,8 @@
     "xo": "^0.17.0"
   },
   "dependencies": {
-    "child-process-promise": "^2.2.0"
+    "child-process-promise": "^2.2.0",
+    "uws": "^0.11.0",
+    "ws": "^1.1.1"
   }
 }

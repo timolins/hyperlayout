@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+const WebSocket = require('ws')
+
+const ws = new WebSocket('ws://localhost:7150')
+
+const command = process.argv[2]
+
+ws.on('open', () => {
+  ws.send(process.cwd(), command)
+  ws.close()
+  console.log('sent')
+})

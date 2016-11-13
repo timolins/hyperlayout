@@ -1,72 +1,43 @@
-const {exec} = require('child-process-promise')
+const fs = require('fs')
+const WebSocketServer = require('ws').Server
+
+let hyperlayout
 
 const example = [
-  'echo 1',
-  ['echo 2', ['echo 4', 'echo 5']],
-  ['echo 3', 'echo 6']
+  ['echo 1', 'http://timo.sh']
 ]
 
-// const example = [
-//   ['echo 1'], ['echo 1', 'echo 2']
-// ]
+// Read json file
 
-const getCwd = pid => exec(`lsof -p ${pid} | grep cwd | tr -s ' ' | cut -d ' ' -f9-`)
+const readJson = (cwd, file) => JSON.parse(fs.readFileSync(`${cwd}/${file}`, 'utf8'))
 
-function requestSession(cwdPid, mode) {
-  getCwd(cwdPid)
-  .then(cwd => {
-    cwd = cwd.stdout.trim()
-    const payload = {cwd}
-    switch (mode) {
-      case 'HORIZONTAL':
-      case 'VERTICAL':
-        payload.splitDirection = mode
-        break
-      default:
-        break
-    }
-    window.rpc.emit('new', payload)
-  })
-  .catch(err => {
-    console.error(`Couldn't get cwd`, err)
-  })
-}
-
-function runCommand(uid, cmd) {
-  window.rpc.emit('data', {
-    uid,
-    data: ` ${cmd}\n`
-  })
-}
-
-function focusUid({dispatch}, uid) {
-  dispatch({
-    type: 'SESSION_SET_ACTIVE',
-    uid
-  })
-}
-
-const panes = []
-
-const convertConfig = item => {
-  if (item instanceof Array) {
-    return item.map(convertConfig)
-  } else if (typeof item === 'string') {
-    const pane = {cmd: item, index: panes.length}
-    panes.push(pane)
-    return pane
+// Get config file by reading `.hyperlayout` and `package.json`
+const getConfig = cwd => {
+  try {
+    return readJson(cwd, '.hyperlayout')
+  } catch (err) {
+    console.log('No .hyperlayout found in directory')
   }
-
-  console.log('Wrong type:', item)
+  try {
+    const {hyperlayout} = readJson(cwd, 'package.json')
+    console.log(readJson(cwd, 'package.json'))
+    if (hyperlayout) {
+      return hyperlayout
+    }
+  } catch (err) {
+    console.log('No package.json found in directory')
+  }
+  return example
 }
 
-const resolveArray = array => (
-  array instanceof Array ? resolveArray(array[0]) : array
-)
+// Resolves an array, to find deepest cild. [[[1]]] -> 1
+const resolveArray = a => a instanceof Array ? resolveArray(a[0]) : a
 
-const nextMod = mode => {
+// Walk through modes – WINDOW -> TAB -> HORIZONTAL -> VERTICAL -> HORIZONTAL -> ...
+const nextMode = mode => {
   switch (mode) {
     case 'TAB':
+    case 'PANE':
     case 'VERTICAL':
       return 'HORIZONTAL'
     case 'HORIZONTAL':
@@ -78,6 +49,7 @@ const nextMod = mode => {
   }
 }
 
+// Generate Command queue from converted Config
 function generateQueue(converted, mode = 'TAB') {
   let q = []
   if (converted instanceof Array) {
@@ -96,86 +68,117 @@ function generateQueue(converted, mode = 'TAB') {
       }
     })
     converted.forEach(item => {
-      q = [...q, ...generateQueue(item, nextMod(mode))]
+      q = [...q, ...generateQueue(item, nextMode(mode))]
     })
   }
   return q
 }
 
-const isCommand = ({data, type}) => (
-  type === 'SESSION_ADD_DATA' ?
-    /(hyperlayout: command not found)|(command not found: hyperlayout)/.test(data) :
-    false
-)
+// Hyperlayout instance
+class Hyperlayout {
+  constructor(cwd, store) {
+    this.cwd = cwd
+    this.store = store
+    this.config = getConfig(cwd)
+    this.panes = []
+    this.lastIndex = 0
+    console.log('config', this.config, cwd)
+    const converted = this.convertConfig(this.config)
 
-let queue = []
-let lastIndex = 0
+    this.queue = generateQueue(converted)
+    this.work()
+  }
+  work() {
+    const {sessions} = this.store.getState()
+    const {lastIndex, cwd} = this
+    const {activeUid} = sessions
+    const pane = this.panes[lastIndex]
+    if (this.queue.length > 0) {
+      const item = this.queue.shift()
+      const {index} = item.pane
 
-const workQueue = (store, currentUid) => {
-  const {sessions} = store.getState()
-  const currentSession = sessions.sessions[currentUid]
-  if (queue.length > 0) {
-    const item = queue.shift()
-    const {index} = item.pane
-    if (!panes[lastIndex].uid) {
-      panes[lastIndex].uid = currentUid
-      runCommand(currentUid, panes[lastIndex].cmd)
-    }
-    lastIndex = index
-    if (item.action === 'split') {
-      requestSession(currentSession.pid, item.mode)
-    } else {
-      const jumpTo = panes[index].uid
-      if (jumpTo) {
-        focusUid(store, jumpTo)
+      if (!pane.uid) {
+        this.panes[lastIndex].uid = activeUid
+        runCommand(activeUid, pane.cmd)
       }
-      workQueue(store, currentUid)
+      this.lastIndex = index
+      if (item.action === 'split') {
+        requestSession(cwd, item.mode)
+      } else {
+        const jumpTo = this.panes[index].uid
+        if (jumpTo) {
+          focusUid(this.store, jumpTo)
+        }
+        this.work()
+      }
+    } else if (lastIndex) {
+      runCommand(activeUid, pane.cmd)
+      this.lastIndex = 0
     }
-  } else if (lastIndex) {
-    runCommand(currentUid, panes[lastIndex].cmd)
-    lastIndex = 0
+  }
+  convertConfig(item) {
+    if (item instanceof Array) {
+      return item.map(this.convertConfig.bind(this))
+    } else if (typeof item === 'string') {
+      const pane = {cmd: item, index: this.panes.length}
+      this.panes.push(pane)
+      return pane
+    }
+    console.error('Wrong type:', item)
   }
 }
 
-const getPIDByUID = (store, uid) => {
-  const {sessions} = store.getState()
-  const session = sessions.sessions[uid]
-  return session.pid
+// Listen for commands
+const listen = store => {
+  const wss = new WebSocketServer({port: 7150})
+  wss.on('connection', ws => {
+    ws.on('message', cwd => {
+      hyperlayout = new Hyperlayout(cwd, store)
+    })
+    ws.send('something')
+  })
 }
 
-let firstUid
+// Request new Session (Tab, Pane)
+function requestSession(cwd, mode) {
+  console.log('new', mode)
+  const payload = {cwd}
+  switch (mode) {
+    case 'HORIZONTAL':
+    case 'VERTICAL':
+      payload.splitDirection = mode
+      break
+    default:
+      break
+  }
+  window.rpc.emit('new', payload)
+}
+
+// Runs command in given `uid`
+function runCommand(uid, cmd) {
+  console.log('Running Command', uid, cmd)
+  window.rpc.emit('data', {
+    uid,
+    data: ` ${cmd}\n`
+  })
+}
+
+// Focuses given `uid` – useful for pane operations
+function focusUid({dispatch}, uid) {
+  dispatch({
+    type: 'SESSION_SET_ACTIVE',
+    uid
+  })
+}
+
+// Listens for initial load and sessions
 exports.middleware = store => next => action => {
-  const {uid, type} = action
-  if (type === 'SESSION_SET_PROCESS_TITLE') {
-    firstUid = firstUid || uid
-    workQueue(store, uid)
+  const {type} = action
+  if (type === 'CONFIG_LOAD') {
+    listen(store)
   }
-  if (isCommand(action)) {
-    const session = getPIDByUID(store, uid || firstUid)
-    getCwd(session).then(cwd => {
-      cwd = cwd.stdout.trim()
-      const config = getConfig(cwd)
-      queue = generateQueue(convertConfig(config))
-      workQueue(store, uid || firstUid)
-    })
-    .catch(err => {
-      console.error(`Couldn't get cwd`, err)
-    })
+  if (type === 'SESSION_SET_PROCESS_TITLE' && hyperlayout) {
+    hyperlayout.work()
   }
   next(action)
-}
-
-function getConfig(cwd) {
-  try {
-    const config = require(`${cwd}/package.json`)
-    return config.hyperlayout
-  } catch (err) {
-    console.error('No package.json found in directory')
-  }
-  try {
-    return require(`${cwd}/.hyperlayout`)
-  } catch (err) {
-    console.error('No .hyperlayout found in directory')
-    return example
-  }
 }
