@@ -64,7 +64,7 @@ const resolveArray = array => (
   array instanceof Array ? resolveArray(array[0]) : array
 )
 
-const nextMod = mode => {
+const nextMod = mode => {
   switch (mode) {
     case 'TAB':
     case 'VERTICAL':
