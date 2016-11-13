@@ -1,34 +1,6 @@
-const fs = require('fs')
-const WebSocketServer = require('ws').Server
+const io = require('socket.io')()
 
 let hyperlayout
-
-const example = [
-  ['echo 1', 'http://timo.sh']
-]
-
-// Read json file
-
-const readJson = (cwd, file) => JSON.parse(fs.readFileSync(`${cwd}/${file}`, 'utf8'))
-
-// Get config file by reading `.hyperlayout` and `package.json`
-const getConfig = cwd => {
-  try {
-    return readJson(cwd, '.hyperlayout')
-  } catch (err) {
-    console.log('No .hyperlayout found in directory')
-  }
-  try {
-    const {hyperlayout} = readJson(cwd, 'package.json')
-    console.log(readJson(cwd, 'package.json'))
-    if (hyperlayout) {
-      return hyperlayout
-    }
-  } catch (err) {
-    console.log('No package.json found in directory')
-  }
-  return example
-}
 
 // Resolves an array, to find deepest cild. [[[1]]] -> 1
 const resolveArray = a => a instanceof Array ? resolveArray(a[0]) : a
@@ -76,13 +48,14 @@ function generateQueue(converted, mode = 'TAB') {
 
 // Hyperlayout instance
 class Hyperlayout {
-  constructor(cwd, store) {
+  constructor(cwd, store, config, ws) {
     this.cwd = cwd
     this.store = store
-    this.config = getConfig(cwd)
+    this.ws = ws
+    this.config = config
     this.panes = []
     this.lastIndex = 0
-    console.log('config', this.config, cwd)
+
     const converted = this.convertConfig(this.config)
 
     this.queue = generateQueue(converted)
@@ -101,6 +74,7 @@ class Hyperlayout {
         this.panes[lastIndex].uid = activeUid
         runCommand(activeUid, pane.cmd)
       }
+
       this.lastIndex = index
       if (item.action === 'split') {
         requestSession(cwd, item.mode)
@@ -113,6 +87,7 @@ class Hyperlayout {
       }
     } else if (lastIndex) {
       runCommand(activeUid, pane.cmd)
+      this.ws.send('done')
       this.lastIndex = 0
     }
   }
@@ -130,13 +105,14 @@ class Hyperlayout {
 
 // Listen for commands
 const listen = store => {
-  const wss = new WebSocketServer({port: 7150})
-  wss.on('connection', ws => {
-    ws.on('message', cwd => {
-      hyperlayout = new Hyperlayout(cwd, store)
+  io.on('connection', socket => {
+    socket.emit('ready')
+    socket.on('hyperlayout', (cwd, config) => {
+      hyperlayout = new Hyperlayout(cwd, store, config, socket)
+      socket.emit('received')
     })
-    ws.send('something')
   })
+  io.listen(7150)
 }
 
 // Request new Session (Tab, Pane)

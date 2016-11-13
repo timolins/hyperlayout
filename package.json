@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "child-process-promise": "^2.2.0",
-    "uws": "^0.11.0",
-    "ws": "^1.1.1"
+    "debug": "^2.3.2",
+    "socket.io": "^1.5.1",
+    "socket.io-client": "^1.5.1"
   }
 }

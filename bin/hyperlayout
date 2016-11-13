@@ -1,12 +1,46 @@
 #!/usr/bin/env node
-const WebSocket = require('ws')
+const fs = require('fs')
+const io = require('socket.io-client')
+const debug = require('debug')('hyperlayout')
 
-const ws = new WebSocket('ws://localhost:7150')
+// const command = process.argv[2]
 
-const command = process.argv[2]
+// Read json file
+const readJson = file => JSON.parse(fs.readFileSync(`${process.cwd()}/${file}`, 'utf8'))
 
-ws.on('open', () => {
-  ws.send(process.cwd(), command)
-  ws.close()
-  console.log('sent')
-})
+// Get config file by reading `.hyperlayout` and `package.json`
+const getConfig = () => {
+  try {
+    return readJson('.hyperlayout')
+  } catch (err) {
+    debug('No .hyperlayout found in directory')
+  }
+  try {
+    const {hyperlayout} = readJson('package.json')
+    if (hyperlayout) {
+      return hyperlayout
+    }
+  } catch (err) {
+    debug('No package.json found in directory')
+  }
+}
+
+function send() {
+  const config = getConfig()
+
+  if (!config) {
+    return console.log(`Couldn't find hyperlayout presets`)
+  }
+
+  const socket = io('http://localhost:7150')
+  socket.on('ready', () => {
+    socket.emit('hyperlayout', process.cwd(), getConfig())
+  })
+
+  socket.on('received', () => {
+    console.log('Hyperterm activated')
+    socket.close()
+  })
+}
+
+send()
