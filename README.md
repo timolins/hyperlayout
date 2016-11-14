@@ -1,10 +1,10 @@
+
 <img src="assets/header.png" width="320" >
+
+> Layout presets for [Hyper.app](https://hyper.is)
 
 
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-
-Layout presets for Hyper.app
-
 ## Install
 
 ```sh
@@ -13,6 +13,8 @@ $ hpm install hyperlayout
 ```
 
 ## Usage
+
+To run `hyperlayout`
 
 ```sh
 $ hyperlayout
