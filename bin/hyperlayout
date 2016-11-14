@@ -30,7 +30,6 @@ const getConfig = presetName => {
   } catch (err) {
     debug('No .hyperlayout found in home directory')
   }
-
   if (config) {
     // Check if command is given
     if (presetName) {
@@ -52,6 +51,7 @@ const getConfig = presetName => {
       layout: config
     }
   }
+
   if (config && !config.layout) {
     console.log(`Can't find layout inside config`)
     return
