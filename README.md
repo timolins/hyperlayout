@@ -13,13 +13,11 @@ $ hpm install hyperlayout
 ```
 
 ## Usage
+To get started, setup a layout inside of `package.json`.
 
-To run `hyperlayout`
+_Alternatively you can define it inside of `.hyperlayout` or `~/.hyperlayout`._
 
-```sh
-$ hyperlayout
-```
-`package.json`
+> `package.json`
 ```json
 {
   "name": "example-1",
@@ -32,23 +30,83 @@ $ hyperlayout
 }
 ```
 
-![Example 1](assets/example1.svg)
+To apply the layout, simply run `hyperlayout` in the same directory.
 
-`package.json`
+```sh
+$ hyperlayout
+```
+#### Result
+![Demo 1](assets/demo1.svg)
+
+---
+
+### Advanced example
+This example shows the capabilities of `hyperlayout`.
+
+> `package.json`
 ```json
 {
-  "name": "my-example",
+  "name": "example-2",
   "scripts": {
     "watch": "gulp watch",
     "serve": "nodemon build/index"
   },
-  "hyperlayout": [
-    [[
-      "npm run watch",
-      ["npm run serve", "http://localhost:3000"]
-    ]],
-    "mongod"
-  ]
+  "hyperlayout": {
+      "start": [
+        [[
+          "npm run watch",
+          ["npm run serve", "http://localhost:3000"]
+        ]],
+        "mongod"
+      ],
+      "helloworld": {
+        "entry": "horizontal",
+        "layout": [
+          "echo 'Hello'",
+          "echo 'World'"
+        ]
+      }
+  }
 }
 ```
-![Example 2](assets/example2.svg)
+
+Since there are two layouts defined here, you have to tell `hyperlayout` which one you want to use, by suppling it as parameter.
+
+```sh
+$ hyperlayout start
+```
+#### Result
+![Demo 2](assets/demo2.svg)
+
+## Examples
+![Example 1](assets/example1.svg) **Tabs**
+```json
+["1", "2"]
+```
+---
+![Example 2](assets/example2.svg) **Horizontal Panes**
+```json
+[["1", "2"]]
+```
+or
+```json
+{
+  "entry": "horizontal",
+  "layout": ["1", "2"]
+}
+```
+---
+![Example 3](assets/example3.svg) **Vertical Panes**
+```json
+[[["1", "2"]]]
+```
+or
+```json
+{
+  "entry": "vertical",
+  "layout": ["1", "2"]
+}
+```
+
+## License
+`hyperlayout` was written by [Timo Lins](https://timo.sh).
