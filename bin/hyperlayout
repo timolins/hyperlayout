@@ -3,24 +3,32 @@ const fs = require('fs')
 const isHyper = require('is-hyper')()
 const debug = require('debug')('hyperlayout')
 
-const command = process.argv[2]
 // Read json file
 const readJson = (dir, file) => JSON.parse(fs.readFileSync(`${dir}/${file}`, 'utf8'))
 
 // Get config file by reading `.hyperlayout` and `package.json`
-const getConfig = presetName => {
+const getConfig = () => {
   let config
-  try {
-    const subConfig = readJson(process.cwd(), '.hyperlayout')
-    config = config || subConfig
-  } catch (err) {
-    debug('No .hyperlayout found in directory')
-  }
-  try {
-    const {hyperlayout} = readJson(process.cwd(), 'package.json')
-    config = config || hyperlayout
-  } catch (err) {
-    debug('No package.json found in directory', err)
+
+  const flag = process.argv[2]
+  const isGlobal = flag === 'global' || flag === 'g'
+  const presetName = isGlobal ? process.argv[3] : flag
+
+  if (isGlobal) {
+    debug('Global configuration forced')
+  } else {
+    try {
+      const subConfig = readJson(process.cwd(), '.hyperlayout')
+      config = config || subConfig
+    } catch (err) {
+      debug('No .hyperlayout found in directory')
+    }
+    try {
+      const {hyperlayout} = readJson(process.cwd(), 'package.json')
+      config = config || hyperlayout
+    } catch (err) {
+      debug('No package.json found in directory')
+    }
   }
   try {
     const subConfig = readJson(process.env.HOME, '.hyperlayout')
@@ -28,6 +36,7 @@ const getConfig = presetName => {
   } catch (err) {
     debug('No .hyperlayout found in home directory')
   }
+
   if (config) {
     // Check if command is given
     if (presetName) {
@@ -64,7 +73,7 @@ function start() {
   }
 
   const data = {
-    config: getConfig(command),
+    config: getConfig(),
     cwd: process.cwd()
   }
 
