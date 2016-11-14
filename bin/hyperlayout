@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs')
 const io = require('socket.io-client')
+const isHyper = require('is-hyper')()
 const debug = require('debug')('hyperlayout')
 
 const command = process.argv[2]
@@ -29,18 +30,18 @@ const getConfig = presetName => {
   } catch (err) {
     debug('No .hyperlayout found in home directory')
   }
-  // Check if command is given
+
   if (config) {
+    // Check if command is given
     if (presetName) {
       const preset = config[presetName]
       if (preset) {
         config = preset
       } else {
-        console.log(`Couldn't find preset "${presetName}"`)
+        console.log(`Can't find preset "${presetName}"`)
         return 'error'
       }
     } else if (config.default) {
-      console.log('default')
       config = config.default
     }
   }
@@ -52,17 +53,22 @@ const getConfig = presetName => {
     }
   }
   if (config && !config.layout) {
-    console.log(`Couldn't find layout inside config`)
+    console.log(`Can't find layout inside config`)
     return
   }
   return config
 }
 
-function send() {
+function start() {
+  if (!isHyper) {
+    console.log('You need to use Hyper.app to run this command')
+    return
+  }
+
   const config = getConfig(command)
 
   if (!config) {
-    console.log(`Couldn't find any hyperlayout preset (.hyperlayout, package.json, ~./hyperlayout)`)
+    console.log(`Can't find any hyperlayout preset (.hyperlayout, package.json, ~./hyperlayout)`)
     return
   } else if (config === 'error') {
     return
@@ -77,6 +83,11 @@ function send() {
     console.log('hyperlayout activated')
     socket.close()
   })
+
+  socket.on('connect_error', () => {
+    console.log(`Can't connect to plugin. Is hyperlayout installed in Hyper.app?`)
+    socket.close()
+  })
 }
 
-send()
+start()

@@ -50,10 +50,10 @@ function generateQueue(converted, mode = 'TAB') {
 
 // Hyperlayout instance
 class Hyperlayout {
-  constructor(cwd, store, config, ws) {
+  constructor(cwd, store, config, socket) {
     this.cwd = cwd
     this.store = store
-    this.ws = ws
+    this.socket = socket
     this.panes = []
     this.lastIndex = 0
 
@@ -89,7 +89,7 @@ class Hyperlayout {
       }
     } else if (lastIndex) {
       runCommand(activeUid, pane.cmd)
-      this.ws.send('done')
+      this.socket.send('done')
       this.lastIndex = 0
     }
   }
@@ -115,6 +115,9 @@ const listen = store => {
     })
   })
   io.listen(7150)
+  io.on('error', err => {
+    console.log('New window failed to create socket server', err)
+  })
 }
 
 // Request new Session (Tab, Pane)
