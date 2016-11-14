@@ -1,5 +1,3 @@
-const io = require('socket.io')()
-
 let hyperlayout
 
 // Resolves an array, to find deepest cild. [[[1]]] -> 1
@@ -50,10 +48,9 @@ function generateQueue(converted, mode = 'TAB') {
 
 // Hyperlayout instance
 class Hyperlayout {
-  constructor(cwd, store, config, socket) {
+  constructor({config, cwd}, store) {
     this.cwd = cwd
     this.store = store
-    this.socket = socket
     this.panes = []
     this.lastIndex = 0
 
@@ -89,7 +86,6 @@ class Hyperlayout {
       }
     } else if (lastIndex) {
       runCommand(activeUid, pane.cmd)
-      this.socket.send('done')
       this.lastIndex = 0
     }
   }
@@ -105,24 +101,8 @@ class Hyperlayout {
   }
 }
 
-// Listen for commands
-const listen = store => {
-  io.on('connection', socket => {
-    socket.emit('ready')
-    socket.on('hyperlayout', (cwd, config) => {
-      hyperlayout = new Hyperlayout(cwd, store, config, socket)
-      socket.emit('received')
-    })
-  })
-  io.listen(7150)
-  io.on('error', err => {
-    console.log('New window failed to create socket server', err)
-  })
-}
-
 // Request new Session (Tab, Pane)
 function requestSession(cwd, mode) {
-  console.log('new', mode)
   const payload = {cwd}
   switch (mode) {
     case 'HORIZONTAL':
@@ -153,13 +133,28 @@ function focusUid({dispatch}, uid) {
 }
 
 // Listens for initial load and sessions
+let lastUid
 exports.middleware = store => next => action => {
-  const {type} = action
-  if (type === 'CONFIG_LOAD') {
-    listen(store)
+  const {type, data} = action
+  const {sessions} = store.getState()
+  const {activeUid} = sessions
+
+  // Check for hyperlayout config
+  if (type === 'SESSION_ADD_DATA') {
+    const testedData = /^\[hyperlayout config\]:(.*)/.exec(data)
+    if (testedData && testedData[1]) {
+      const config = JSON.parse(testedData[1])
+      hyperlayout = new Hyperlayout(config, store)
+      return
+    }
   }
+
+  // Check for new sessions
   if (type === 'SESSION_SET_PROCESS_TITLE' && hyperlayout) {
-    hyperlayout.work()
+    if (lastUid !== activeUid) {
+      hyperlayout.work()
+    }
+    lastUid = activeUid
   }
   next(action)
 }

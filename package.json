@@ -27,10 +27,7 @@
     "xo": "^0.17.0"
   },
   "dependencies": {
-    "child-process-promise": "^2.2.0",
     "debug": "^2.3.2",
-    "is-hyper": "^0.2.0",
-    "socket.io": "^1.5.1",
-    "socket.io-client": "^1.5.1"
+    "is-hyper": "^0.2.0"
   }
 }

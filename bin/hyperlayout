@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs')
-const io = require('socket.io-client')
 const isHyper = require('is-hyper')()
 const debug = require('debug')('hyperlayout')
 
 const command = process.argv[2]
-
 // Read json file
 const readJson = (dir, file) => JSON.parse(fs.readFileSync(`${dir}/${file}`, 'utf8'))
 
@@ -65,29 +63,19 @@ function start() {
     return
   }
 
-  const config = getConfig(command)
+  const data = {
+    config: getConfig(command),
+    cwd: process.cwd()
+  }
 
-  if (!config) {
+  if (!data.config) {
     console.log(`Can't find any hyperlayout preset (.hyperlayout, package.json, ~./hyperlayout)`)
     return
-  } else if (config === 'error') {
+  } else if (data.config.layout === 'error') {
     return
   }
 
-  const socket = io('http://localhost:7150')
-  socket.on('ready', () => {
-    socket.emit('hyperlayout', process.cwd(), config)
-  })
-
-  socket.on('received', () => {
-    console.log('hyperlayout activated')
-    socket.close()
-  })
-
-  socket.on('connect_error', () => {
-    console.log(`Can't connect to plugin. Is hyperlayout installed in Hyper.app?`)
-    socket.close()
-  })
+  console.log('[hyperlayout config]:' + JSON.stringify(data))
 }
 
 start()
