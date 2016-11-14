@@ -21,10 +21,29 @@ $ hpm install hyperlayout
     "serve": "nodemon build/index"
   },
   "hyperlayout": [
-    ["npm run watch"],
-    ["npm run serve"]
+    "echo 'Hello'",
+    "echo 'World'"
   ]
 }
 ```
 
-![test](assets/example1.png)
+![Example 1](assets/example1.png)
+
+`package.json`
+```json
+{
+  "name": "my-example",
+  "scripts": {
+    "watch": "gulp watch",
+    "serve": "nodemon build/index"
+  },
+  "hyperlayout": [
+    [
+      "npm run watch",
+      ["npm run serve", "http://localhost:3000"]
+    ],
+    "mongod"
+  ]
+}
+```
+![Example 2](assets/example2.png)
