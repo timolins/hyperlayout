@@ -9,9 +9,9 @@ const resolveArray = a => a instanceof Array ? resolveArray(a[0]) : a
 const nextMode = mode => {
   switch (mode) {
     case 'TAB':
-    case 'PANE':
     case 'VERTICAL':
       return 'HORIZONTAL'
+    case 'PANE':
     case 'HORIZONTAL':
       return 'VERTICAL'
     case 'WINDOW':
@@ -23,6 +23,8 @@ const nextMode = mode => {
 
 // Generate Command queue from converted Config
 function generateQueue(converted, mode = 'TAB') {
+  mode = (mode === 'PANE') ? 'HORIZONTAL' : mode
+
   let q = []
   if (converted instanceof Array) {
     converted.forEach((item, i) => {
@@ -52,13 +54,13 @@ class Hyperlayout {
     this.cwd = cwd
     this.store = store
     this.ws = ws
-    this.config = config
     this.panes = []
     this.lastIndex = 0
 
-    const converted = this.convertConfig(this.config)
-
-    this.queue = generateQueue(converted)
+    const converted = this.convertConfig(config.layout)
+    const entry = (config.entry || 'tab').toUpperCase()
+    console.log(entry)
+    this.queue = generateQueue(converted, entry)
     this.work()
   }
   work() {

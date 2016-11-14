@@ -3,42 +3,78 @@ const fs = require('fs')
 const io = require('socket.io-client')
 const debug = require('debug')('hyperlayout')
 
-// const command = process.argv[2]
+const command = process.argv[2]
 
 // Read json file
-const readJson = file => JSON.parse(fs.readFileSync(`${process.cwd()}/${file}`, 'utf8'))
+const readJson = (dir, file) => JSON.parse(fs.readFileSync(`${dir}/${file}`, 'utf8'))
 
 // Get config file by reading `.hyperlayout` and `package.json`
-const getConfig = () => {
+const getConfig = presetName => {
+  let config
   try {
-    return readJson('.hyperlayout')
+    const subConfig = readJson(process.cwd(), '.hyperlayout')
+    config = config || subConfig
   } catch (err) {
     debug('No .hyperlayout found in directory')
   }
   try {
-    const {hyperlayout} = readJson('package.json')
-    if (hyperlayout) {
-      return hyperlayout
-    }
+    const {hyperlayout} = readJson(process.cwd(), 'package.json')
+    config = config || hyperlayout
   } catch (err) {
-    debug('No package.json found in directory')
+    debug('No package.json found in directory', err)
   }
+  try {
+    const subConfig = readJson(process.env.HOME, '.hyperlayout')
+    config = config || subConfig
+  } catch (err) {
+    debug('No .hyperlayout found in home directory')
+  }
+  // Check if command is given
+  if (config) {
+    if (presetName) {
+      const preset = config[presetName]
+      if (preset) {
+        config = preset
+      } else {
+        console.log(`Couldn't find preset "${presetName}"`)
+        return 'error'
+      }
+    } else if (config.default) {
+      console.log('default')
+      config = config.default
+    }
+  }
+
+  if (config instanceof Array) {
+    config = {
+      entry: 'tab',
+      layout: config
+    }
+  }
+  if (config && !config.layout) {
+    console.log(`Couldn't find layout inside config`)
+    return
+  }
+  return config
 }
 
 function send() {
-  const config = getConfig()
+  const config = getConfig(command)
 
   if (!config) {
-    return console.log(`Couldn't find hyperlayout presets`)
+    console.log(`Couldn't find any hyperlayout preset (.hyperlayout, package.json, ~./hyperlayout)`)
+    return
+  } else if (config === 'error') {
+    return
   }
 
   const socket = io('http://localhost:7150')
   socket.on('ready', () => {
-    socket.emit('hyperlayout', process.cwd(), getConfig())
+    socket.emit('hyperlayout', process.cwd(), config)
   })
 
   socket.on('received', () => {
-    console.log('Hyperterm activated')
+    console.log('hyperlayout activated')
     socket.close()
   })
 }
