@@ -1,18 +1,18 @@
 
-<img src="assets/header.png" width="320" >
+<img src="https://github.com/timolins/hyperlayout/raw/master/assets/header.png" width="320" >
 
 > Layout presets for [Hyper.app](https://hyper.is)
 
 
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-## Install
+# Install
 
 ```sh
 $ npm install -g hyperlayout hpm-cli
 $ hpm install hyperlayout
 ```
 
-## Usage
+# Usage
 To get started, setup a layout inside of `package.json`.
 
 _Alternatively you can define it inside of `.hyperlayout` or `~/.hyperlayout`._
@@ -36,11 +36,10 @@ To apply the layout, simply run `hyperlayout` in the same directory.
 $ hyperlayout
 ```
 #### Result
-![Demo 1](assets/demo1.svg)
+![Demo 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/demo1.svg)
 
----
 
-### Advanced example
+## Advanced example
 This example shows the capabilities of `hyperlayout`.
 
 > `package.json`
@@ -76,15 +75,15 @@ Since there are two layouts defined here, you have to tell `hyperlayout` which o
 $ hyperlayout start
 ```
 #### Result
-![Demo 2](assets/demo2.svg)
+![Demo 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/demo2.svg)
 
-## Examples
-![Example 1](assets/example1.svg) **Tabs**
+# Examples
+![Example 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example1.svg) **Tabs**
 ```json
 ["1", "2"]
 ```
 ---
-![Example 2](assets/example2.svg) **Horizontal Panes**
+![Example 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example2.svg) **Horizontal Panes**
 ```json
 [["1", "2"]]
 ```
@@ -96,7 +95,7 @@ or
 }
 ```
 ---
-![Example 3](assets/example3.svg) **Vertical Panes**
+![Example 3](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example3.svg) **Vertical Panes**
 ```json
 [[["1", "2"]]]
 ```
@@ -108,5 +107,8 @@ or
 }
 ```
 
-## License
-`hyperlayout` was written by [Timo Lins](https://timo.sh).
+# Known Issues
+* It isn't possible layout multiple windows at once. If you know how to approach this feature, then head over to [Issue #2](https://github.com/timolins/hyperlayout/issues/2) and let me know!
+
+# Author
+`hyperlayout`  was written by [Timo Lins](https://timo.sh).
