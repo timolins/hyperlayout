@@ -78,12 +78,14 @@ $ hyperlayout start
 ![Demo 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/demo2.svg)
 
 # Examples
-![Example 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example1.svg) **Tabs**
+#### Tabs
+![Example 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example1.svg)
 ```json
 ["1", "2"]
 ```
 ---
-![Example 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example2.svg) **Horizontal Panes**
+#### Horizontal Panes
+![Example 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example2.svg)
 ```json
 [["1", "2"]]
 ```
@@ -95,7 +97,8 @@ or
 }
 ```
 ---
-![Example 3](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example3.svg) **Vertical Panes**
+#### Vertical Panes
+![Example 3](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example3.svg)
 ```json
 [[["1", "2"]]]
 ```
