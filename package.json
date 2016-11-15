@@ -1,6 +1,6 @@
 {
   "name": "hyperlayout",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Layout presets for Hyper.app",
   "repository": "timolins/hyperlayout",
   "author": "Timo Lins <me@timo.sh>",
@@ -27,7 +27,6 @@
     "xo": "^0.17.0"
   },
   "dependencies": {
-    "debug": "^2.3.2",
-    "is-hyper": "^0.2.0"
+    "debug": "^2.3.2"
   }
 }

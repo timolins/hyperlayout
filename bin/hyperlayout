@@ -1,10 +1,29 @@
 #!/usr/bin/env node
-const fs = require('fs')
-const isHyper = require('is-hyper')()
+const {readFileSync} = require('fs')
+const {homedir} = require('os')
+const {resolve} = require('path')
+const vm = require('vm')
 const debug = require('debug')('hyperlayout')
 
+const env = process.env
+
 // Read json file
-const readJson = (dir, file) => JSON.parse(fs.readFileSync(`${dir}/${file}`, 'utf8'))
+const readJson = (dir, file) => JSON.parse(readFileSync(`${dir}/${file}`, 'utf8'))
+
+const isPluginInstalled = () => {
+  const path = resolve(homedir(), '.hyper.js')
+  try {
+    const hyperConfig = readFileSync(path, 'utf8')
+    const script = new vm.Script(hyperConfig)
+    const module = {}
+    script.runInNewContext({module})
+    const {plugins, localPlugins} = module.exports
+    const pluginArray = plugins.concat(localPlugins)
+    return pluginArray.includes('hyperlayout')
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 // Get config file by reading `.hyperlayout` and `package.json`
 const getConfig = () => {
@@ -31,7 +50,7 @@ const getConfig = () => {
     }
   }
   try {
-    const subConfig = readJson(process.env.HOME, '.hyperlayout')
+    const subConfig = readJson(homedir(), '.hyperlayout')
     config = config || subConfig
   } catch (err) {
     debug('No .hyperlayout found in home directory')
@@ -61,14 +80,19 @@ const getConfig = () => {
 
   if (config && !config.layout) {
     console.log(`Can't find layout inside config`)
-    return
+    return 'error'
   }
   return config
 }
 
 function start() {
-  if (!isHyper) {
+  if (env.TERM_PROGRAM !== 'Hyper' && env.TERM_PROGRAM !== 'HyperTerm' && !env.HYPERLAYOUT) {
     console.log('You need to use Hyper.app to run this command')
+    return
+  }
+
+  if (!isPluginInstalled() && !env.HYPERLAYOUT) {
+    console.log(`Can't find hyperlayout plugin in ~/.hyper.js.\n\You can install it with: $ hpm install hyperlayout`)
     return
   }
 
