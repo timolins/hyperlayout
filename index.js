@@ -56,7 +56,7 @@ class Hyperlayout {
 
     const converted = this.convertConfig(config.layout)
     const entry = (config.entry || 'tab').toUpperCase()
-    console.log(entry)
+
     this.queue = generateQueue(converted, entry)
     this.work()
   }
@@ -65,6 +65,9 @@ class Hyperlayout {
     const {lastIndex, cwd} = this
     const {activeUid} = sessions
     const pane = this.panes[lastIndex]
+
+    this.initUid = this.initUid || activeUid
+
     if (this.queue.length > 0) {
       const item = this.queue.shift()
       const {index} = item.pane
@@ -84,9 +87,12 @@ class Hyperlayout {
         }
         this.work()
       }
-    } else if (lastIndex) {
+    } else if (lastIndex && this.initUid) {
       runCommand(activeUid, pane.cmd)
       this.lastIndex = 0
+    } else if (this.initUid) {
+      focusUid(this.store, this.initUid)
+      this.initUid = false
     }
   }
   convertConfig(item) {
