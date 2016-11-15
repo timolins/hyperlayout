@@ -106,7 +106,7 @@ function start() {
   if (!data.config) {
     console.log(`Can't find any hyperlayout preset (.hyperlayout, package.json, ~./hyperlayout)`)
     return
-  } else if (data.config.layout === 'error') {
+  } else if (data.config === 'error') {
     return
   }
 

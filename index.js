@@ -20,10 +20,11 @@ const nextMode = mode => {
 }
 
 // Generate Command queue from converted Config
-function generateQueue(converted, mode = 'TAB') {
+function generateQueue(converted, mode = 'TAB', initial) {
   mode = (mode === 'PANE') ? 'HORIZONTAL' : mode
 
   let q = []
+
   if (converted instanceof Array) {
     converted.forEach((item, i) => {
       if (i > 0) {
@@ -35,6 +36,12 @@ function generateQueue(converted, mode = 'TAB') {
       } else {
         q.push({
           action: 'jump',
+          pane: resolveArray(item)
+        })
+      }
+      if (initial || i > 0) {
+        q.push({
+          action: 'cmd',
           pane: resolveArray(item)
         })
       }
@@ -53,11 +60,11 @@ class Hyperlayout {
     this.store = store
     this.panes = []
     this.lastIndex = 0
+    this.knownUids = []
 
     const converted = this.convertConfig(config.layout)
     const entry = (config.entry || 'tab').toUpperCase()
-
-    this.queue = generateQueue(converted, entry)
+    this.queue = generateQueue(converted, entry, true)
     this.work()
   }
   work() {
@@ -66,33 +73,33 @@ class Hyperlayout {
     const {activeUid} = sessions
     const pane = this.panes[lastIndex]
 
-    this.initUid = this.initUid || activeUid
-
     if (this.queue.length > 0) {
       const item = this.queue.shift()
       const {index} = item.pane
 
       if (!pane.uid) {
         this.panes[lastIndex].uid = activeUid
-        runCommand(activeUid, pane.cmd)
       }
 
       this.lastIndex = index
-      if (item.action === 'split') {
-        requestSession(cwd, item.mode)
-      } else {
-        const jumpTo = this.panes[index].uid
-        if (jumpTo) {
-          focusUid(this.store, jumpTo)
+      this.lastUid = activeUid
+      switch (item.action) {
+        case 'split':
+          requestSession(cwd, item.mode)
+          break
+        case 'cmd':
+          runCommand(activeUid, pane.cmd)
+          this.work()
+          break
+        case 'jump':
+        default: {
+          const jumpTo = this.panes[index].uid
+          if (jumpTo) {
+            focusUid(this.store, jumpTo)
+          }
+          this.work()
         }
-        this.work()
       }
-    } else if (lastIndex && this.initUid) {
-      runCommand(activeUid, pane.cmd)
-      this.lastIndex = 0
-    } else if (this.initUid) {
-      focusUid(this.store, this.initUid)
-      this.initUid = false
     }
   }
   convertConfig(item) {
@@ -139,7 +146,6 @@ function focusUid({dispatch}, uid) {
 }
 
 // Listens for initial load and sessions
-let lastUid
 exports.middleware = store => next => action => {
   const {type, data} = action
   const {sessions} = store.getState()
@@ -155,12 +161,13 @@ exports.middleware = store => next => action => {
     }
   }
 
-  // Check for new sessions
+  // Check for sessions
   if (type === 'SESSION_SET_PROCESS_TITLE' && hyperlayout) {
-    if (lastUid !== activeUid) {
+    // Check if it's a new session
+    if (!hyperlayout.knownUids.includes(activeUid)) {
+      hyperlayout.knownUids.push(activeUid)
       hyperlayout.work()
     }
-    lastUid = activeUid
   }
   next(action)
 }
