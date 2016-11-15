@@ -10,6 +10,7 @@ const env = process.env
 // Read json file
 const readJson = (dir, file) => JSON.parse(readFileSync(`${dir}/${file}`, 'utf8'))
 
+// Check if user has hyperlayout plugin installed
 const isPluginInstalled = () => {
   const path = resolve(homedir(), '.hyper.js')
   try {
@@ -92,7 +93,7 @@ function start() {
   }
 
   if (!isPluginInstalled() && !env.HYPERLAYOUT) {
-    console.log(`Can't find hyperlayout plugin in ~/.hyper.js.\n\You can install it with: $ hpm install hyperlayout`)
+    console.log(`Can't find hyperlayout plugin in ~/.hyper.js.\n\nYou can install it with: $ hpm install hyperlayout`)
     return
   }
 
