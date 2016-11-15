@@ -22,7 +22,8 @@ const isPluginInstalled = () => {
     const pluginArray = plugins.concat(localPlugins)
     return pluginArray.includes('hyperlayout')
   } catch (err) {
-    console.log(err)
+    debug(err)
+    return false
   }
 }
 

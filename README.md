@@ -4,7 +4,7 @@
 > Layout presets for [Hyper.app](https://hyper.is)
 
 
-[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
+[![Build Status](https://travis-ci.org/timolins/hyperlayout.svg?branch=master)](https://travis-ci.org/timolins/hyperlayout) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 
 
 # Install
