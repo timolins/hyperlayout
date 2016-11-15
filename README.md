@@ -5,6 +5,8 @@
 
 
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
+
+
 # Install
 
 ```sh
@@ -15,7 +17,7 @@ $ hpm install hyperlayout
 # Usage
 To get started, setup a layout inside of `package.json`.
 
-_Alternatively you can define it inside of `.hyperlayout` or `~/.hyperlayout`._
+_Alternatively you can define it in `.hyperlayout` or `~/.hyperlayout`._
 
 > `package.json`
 ```json
@@ -36,7 +38,7 @@ To apply the layout, simply run `hyperlayout` in the same directory.
 $ hyperlayout
 ```
 #### Result
-![Demo 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/demo1.svg)
+![Demo 1](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/demo1.svg)
 
 
 ## Advanced example
@@ -75,17 +77,17 @@ Since there are two layouts defined here, you have to tell `hyperlayout` which o
 $ hyperlayout start
 ```
 #### Result
-![Demo 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/demo2.svg)
+![Demo 2](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/demo2.svg)
 
 # Examples
 #### Tabs
-![Example 1](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example1.svg)
+![Example 1](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/example1.svg)
 ```json
 ["1", "2"]
 ```
 ---
 #### Horizontal Panes
-![Example 2](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example2.svg)
+![Example 2](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/example2.svg)
 ```json
 [["1", "2"]]
 ```
@@ -98,7 +100,7 @@ or
 ```
 ---
 #### Vertical Panes
-![Example 3](https://cdn.rawgit.com/timolins/hyperlayout/master/assets/example3.svg)
+![Example 3](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/example3.svg)
 ```json
 [[["1", "2"]]]
 ```
@@ -115,3 +117,5 @@ or
 
 # Author
 `hyperlayout`  was written by [Timo Lins](https://timo.sh).
+
+_Special thanks to [Tobias Lins](https://github.com/tobiaslins), for coming up with some great solutions._
