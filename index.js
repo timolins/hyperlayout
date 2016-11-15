@@ -47,9 +47,14 @@ function generateQueue(converted, mode = 'TAB', initial) {
       }
     })
     converted.forEach(item => {
-      q = [...q, ...generateQueue(item, nextMode(mode))]
+      q = q.concat(generateQueue(item, nextMode(mode)))
     })
   }
+  // Jump back to initial pane
+  q.push({
+    action: 'jump',
+    pane: resolveArray(converted)
+  })
   return q
 }
 
