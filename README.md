@@ -3,8 +3,11 @@
 
 > Layout presets for [Hyper.app](https://hyper.is)
 
-
 [![Build Status](https://travis-ci.org/timolins/hyperlayout.svg?branch=master)](https://travis-ci.org/timolins/hyperlayout) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
+
+<img src="https://github.com/timolins/hyperlayout/raw/master/assets/demo.gif" width="532" >
+
+
 
 
 # Install
@@ -110,6 +113,14 @@ or
   "entry": "vertical",
   "layout": ["1", "2"]
 }
+```
+# Global layouts
+You can define global layouts inside `~/.hyperlayout`.
+
+`hyperlayout` will use these layouts when there is no configuration in the current directory. It's possible to force global layouts with the following command:
+
+```sh
+$ hyperlayout global [LAYOUT]
 ```
 
 # Known Issues
