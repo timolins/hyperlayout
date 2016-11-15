@@ -127,6 +127,6 @@ $ hyperlayout global [LAYOUT]
 * It isn't possible layout multiple windows at once. If you know how to approach this feature, then head over to [Issue #2](https://github.com/timolins/hyperlayout/issues/2) and let me know!
 
 # Author
-`hyperlayout`  was written by [Timo Lins](https://timo.sh).
+`hyperlayout` is written by [Timo Lins](https://timo.sh).
 
 _Special thanks to [Tobias Lins](https://github.com/tobiaslins), for coming up with some great solutions._
