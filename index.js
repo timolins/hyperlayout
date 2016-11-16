@@ -150,7 +150,7 @@ function focusUid({dispatch}, uid) {
   })
 }
 
-// Listens for initial load and sessions
+// Listens for cli commands and sessions
 exports.middleware = store => next => action => {
   const {type, data} = action
   const {sessions} = store.getState()
