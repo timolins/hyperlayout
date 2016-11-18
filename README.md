@@ -18,11 +18,11 @@ $ hpm install hyperlayout
 ```
 
 # Usage
-To get started, write [your layout](#define_layout) inside `.hyperlayout`.
+To get started, write [your layout](#define-a-layout) inside `.hyperlayout`.
 
 If you already use a `package.json` file, you can add it there. (With with the `hyperlayout` key)
 
-*Alternatively you can define [global layouts](#global_layouts) in `~/.hyperlayout`.*
+*Alternatively you can define [global layouts](#global-layouts) in `~/.hyperlayout`.*
 
 > `.hyperlayout`
 ```json
@@ -42,9 +42,8 @@ $ hyperlayout
 #### Result
 ![Demo 1](https://cdn.rawgit.com/timolins/hyperlayout/f84d20382116fde4866b46e18180a446dc94d1dd/assets/demo1.svg)
 
-<a name="advanced_example"></a>
 ## Advanced example
-This example shows the capabilities of `hyperlayout`. It demonstrates the usage inside `package.json` and how to define [multiple layouts](#multiple_layouts).
+This example shows the capabilities of `hyperlayout`. It demonstrates the usage inside `package.json` and how to define [multiple layouts](#multiple-layouts).
 
 > `package.json`
 ```json
@@ -126,7 +125,6 @@ or
 }
 ```
 
-<a name="define_layout"></a>
 # Define a layout
 There are two different ways to define a layout:
 
@@ -170,9 +168,8 @@ A layout object should contain the following key-value pairs:
 }
 ```
 
-<a name="multiple_layouts"></a>
 # Multiple Layouts
-As shown in the [Advanced Example](#advanced_example), it's possible to define multiple layouts in one project. Instead of supplying the [layout](#define_layout) directly, you define name for the layout first.
+As shown in the [Advanced Example](#advanced-example), it's possible to define multiple layouts in one project. Instead of supplying the [layout](#define-a-layout) directly, you define name for the layout first.
 
 ```json
 {
@@ -190,7 +187,6 @@ As shown in the [Advanced Example](#advanced_example), it's possible to define m
 $ hyperlayout [NAME]
 ```
 
-<a name="global_layouts"></a>
 # Global layouts
 You can define global layouts inside `~/.hyperlayout`.
 
