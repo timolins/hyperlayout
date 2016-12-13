@@ -135,7 +135,6 @@ function requestSession(cwd, mode) {
 
 // Runs command in given `uid`
 function runCommand(uid, cmd) {
-  console.log('Running Command', uid, cmd)
   window.rpc.emit('data', {
     uid,
     data: ` ${cmd}\n`
@@ -167,11 +166,13 @@ exports.middleware = store => next => action => {
   }
 
   // Check for sessions
-  if (type === 'SESSION_SET_PROCESS_TITLE' && hyperlayout) {
+  if (type === 'SESSION_SET_XTERM_TITLE' && hyperlayout) {
     // Check if it's a new session
     if (!hyperlayout.knownUids.includes(activeUid)) {
       hyperlayout.knownUids.push(activeUid)
-      hyperlayout.work()
+      setTimeout(() => {
+        hyperlayout.work()
+      }, 0)
     }
   }
   next(action)
