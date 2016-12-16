@@ -165,11 +165,11 @@ exports.middleware = store => next => action => {
     }
   }
 
-  // Check for sessions
-  if (type === 'SESSION_SET_XTERM_TITLE' && hyperlayout) {
+ // Check for sessions
+  if (type === 'SESSION_ADD' && hyperlayout) {
     // Check if it's a new session
-    if (!hyperlayout.knownUids.includes(activeUid)) {
-      hyperlayout.knownUids.push(activeUid)
+    if (!hyperlayout.knownUids.includes(action.uid)) {
+      hyperlayout.knownUids.push(action.uid)
       setTimeout(() => {
         hyperlayout.work()
       }, 0)
