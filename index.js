@@ -135,10 +135,12 @@ function requestSession(cwd, mode) {
 
 // Runs command in given `uid`
 function runCommand(uid, cmd) {
-  window.rpc.emit('data', {
-    uid,
-    data: ` ${cmd}\n\r`
-  })
+  if (cmd) {
+    window.rpc.emit('data', {
+      uid,
+      data: ` ${cmd}\n\r`
+    })
+  }
 }
 
 // Focuses given `uid` – useful for pane operations
