@@ -137,7 +137,7 @@ function requestSession(cwd, mode) {
 function runCommand(uid, cmd) {
   window.rpc.emit('data', {
     uid,
-    data: ` ${cmd}\n`
+    data: ` ${cmd}\n\r`
   })
 }
 
@@ -168,6 +168,7 @@ exports.middleware = store => next => action => {
     // Check if it's a new session
     if (!hyperlayout.knownUids.includes(uid)) {
       hyperlayout.knownUids.push(uid)
+      hyperlayout.work()
       setTimeout(() => {
         hyperlayout.work()
       }, 0)
