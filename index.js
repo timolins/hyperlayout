@@ -151,9 +151,7 @@ function focusUid({dispatch}, uid) {
 
 // Listens for cli commands and sessions
 exports.middleware = store => next => action => {
-  const {type, data} = action
-  const {sessions} = store.getState()
-  const {activeUid} = sessions
+  const {type, data, uid} = action
 
   // Check for hyperlayout config
   if (type === 'SESSION_ADD_DATA') {
@@ -168,8 +166,8 @@ exports.middleware = store => next => action => {
  // Check for sessions
   if (type === 'SESSION_ADD' && hyperlayout) {
     // Check if it's a new session
-    if (!hyperlayout.knownUids.includes(action.uid)) {
-      hyperlayout.knownUids.push(action.uid)
+    if (!hyperlayout.knownUids.includes(uid)) {
+      hyperlayout.knownUids.push(uid)
       setTimeout(() => {
         hyperlayout.work()
       }, 0)
