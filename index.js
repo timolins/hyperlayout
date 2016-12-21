@@ -170,7 +170,6 @@ exports.middleware = store => next => action => {
     // Check if it's a new session
     if (!hyperlayout.knownUids.includes(uid)) {
       hyperlayout.knownUids.push(uid)
-      hyperlayout.work()
       setTimeout(() => {
         hyperlayout.work()
       }, 0)
