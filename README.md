@@ -48,7 +48,7 @@ This example shows the capabilities of `hyperlayout`. It demonstrates the usage 
 > `package.json`
 ```json
 {
-  "name": "example-2",
+  "name": "my-example",
   "scripts": {
     "watch": "gulp watch",
     "serve": "nodemon build/index",
