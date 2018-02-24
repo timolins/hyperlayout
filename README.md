@@ -5,6 +5,10 @@
 
 [![Build Status](https://travis-ci.org/timolins/hyperlayout.svg?branch=master)](https://travis-ci.org/timolins/hyperlayout) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 
+> ### This repo is currently unmaintained.
+> I will start working on it again in a few months, when I got more freetime in my hands.
+> Pull requests are very welcome!
+
 <img src="https://github.com/timolins/hyperlayout/raw/master/assets/demo.gif" width="532" >
 
 
